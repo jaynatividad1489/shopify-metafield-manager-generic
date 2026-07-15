@@ -1,0 +1,280 @@
+{% comment %}
+  Section: Product Metafield Manager — Storefront Display
+  Version: Generic / Standalone (Non-Dawn)
+  Author: John Venedick Natividad
+  GitHub: https://github.com/jaynatividad1489
+
+  Works on ANY Shopify theme — zero Dawn dependencies.
+  All styles self-contained in metafield-manager-generic.css
+  All JS self-contained in metafield-manager-generic.js
+
+  Metafield Namespaces:
+  - custom.specs_material
+  - custom.specs_weight
+  - custom.specs_dimensions
+  - custom.specs_origin
+  - custom.size_guide_json
+  - custom.care_instructions_json
+  - custom.product_faqs_json
+  - custom.badges_json
+{% endcomment %}
+
+{{ 'metafield-manager-generic.css' | asset_url | stylesheet_tag }}
+
+{%- assign mf_material   = product.metafields.custom.specs_material -%}
+{%- assign mf_weight     = product.metafields.custom.specs_weight -%}
+{%- assign mf_dimensions = product.metafields.custom.specs_dimensions -%}
+{%- assign mf_origin     = product.metafields.custom.specs_origin -%}
+{%- assign mf_size_guide = product.metafields.custom.size_guide_json -%}
+{%- assign mf_care       = product.metafields.custom.care_instructions_json -%}
+{%- assign mf_faqs       = product.metafields.custom.product_faqs_json -%}
+{%- assign mf_badges     = product.metafields.custom.badges_json -%}
+
+{%- assign has_specs      = false -%}
+{%- assign has_size_guide = false -%}
+{%- assign has_care       = false -%}
+{%- assign has_faqs       = false -%}
+
+{%- if mf_material != blank or mf_weight != blank or mf_dimensions != blank or mf_origin != blank -%}
+  {%- assign has_specs = true -%}
+{%- endif -%}
+{%- if mf_size_guide != blank -%}{%- assign has_size_guide = true -%}{%- endif -%}
+{%- if mf_care != blank -%}{%- assign has_care = true -%}{%- endif -%}
+{%- if mf_faqs != blank -%}{%- assign has_faqs = true -%}{%- endif -%}
+{%- assign has_any = has_specs or has_size_guide or has_care or has_faqs -%}
+
+<div
+  class="mfg"
+  id="MfGeneric"
+  data-product-id="{{ product.id }}"
+>
+
+  {%- comment %} Badges {%- endcomment %}
+  {%- if mf_badges != blank -%}
+    <div class="mfg__badges" id="MfgBadges" data-json="{{ mf_badges | escape }}">
+      <ul class="mfg__badges-list" id="MfgBadgesList" role="list"></ul>
+    </div>
+  {%- endif -%}
+
+  {%- if has_any -%}
+    <div class="mfg__tabs" id="MfgTabs">
+
+      {%- comment %} Tab Buttons {%- endcomment %}
+      <div class="mfg__tab-list" role="tablist" aria-label="Product details">
+        {%- if has_specs -%}
+          <button class="mfg__tab is-active" role="tab" aria-selected="true"
+            aria-controls="MfgPanel-Specs" id="MfgTab-Specs" data-tab="specs">
+            <span aria-hidden="true">📐</span>
+            {{ section.settings.tab_specs_label | default: 'Specifications' }}
+          </button>
+        {%- endif -%}
+        {%- if has_size_guide -%}
+          <button class="mfg__tab {% unless has_specs %}is-active{% endunless %}"
+            role="tab" aria-selected="{% unless has_specs %}true{% else %}false{% endunless %}"
+            aria-controls="MfgPanel-SizeGuide" id="MfgTab-SizeGuide" data-tab="size-guide">
+            <span aria-hidden="true">📏</span>
+            {{ section.settings.tab_size_label | default: 'Size Guide' }}
+          </button>
+        {%- endif -%}
+        {%- if has_care -%}
+          <button class="mfg__tab" role="tab" aria-selected="false"
+            aria-controls="MfgPanel-Care" id="MfgTab-Care" data-tab="care">
+            <span aria-hidden="true">🧺</span>
+            {{ section.settings.tab_care_label | default: 'Care Instructions' }}
+          </button>
+        {%- endif -%}
+        {%- if has_faqs -%}
+          <button class="mfg__tab" role="tab" aria-selected="false"
+            aria-controls="MfgPanel-FAQs" id="MfgTab-FAQs" data-tab="faqs">
+            <span aria-hidden="true">❓</span>
+            {{ section.settings.tab_faqs_label | default: 'FAQs' }}
+          </button>
+        {%- endif -%}
+      </div>
+
+      {%- comment %} Tab Panels {%- endcomment %}
+      <div class="mfg__panels">
+
+        {%- if has_specs -%}
+          <div class="mfg__panel is-active" id="MfgPanel-Specs"
+            role="tabpanel" aria-labelledby="MfgTab-Specs" tabindex="0">
+            <table class="mfg__specs-table" role="table">
+              <tbody>
+                {%- if mf_material != blank -%}
+                  <tr class="mfg__specs-row">
+                    <th class="mfg__specs-label" scope="row">
+                      <span aria-hidden="true">🧵</span>
+                      {{ section.settings.label_material | default: 'Material' }}
+                    </th>
+                    <td class="mfg__specs-value">{{ mf_material }}</td>
+                  </tr>
+                {%- endif -%}
+                {%- if mf_weight != blank -%}
+                  <tr class="mfg__specs-row">
+                    <th class="mfg__specs-label" scope="row">
+                      <span aria-hidden="true">⚖️</span>
+                      {{ section.settings.label_weight | default: 'Weight' }}
+                    </th>
+                    <td class="mfg__specs-value">{{ mf_weight }}</td>
+                  </tr>
+                {%- endif -%}
+                {%- if mf_dimensions != blank -%}
+                  <tr class="mfg__specs-row">
+                    <th class="mfg__specs-label" scope="row">
+                      <span aria-hidden="true">📐</span>
+                      {{ section.settings.label_dimensions | default: 'Dimensions' }}
+                    </th>
+                    <td class="mfg__specs-value">{{ mf_dimensions }}</td>
+                  </tr>
+                {%- endif -%}
+                {%- if mf_origin != blank -%}
+                  <tr class="mfg__specs-row">
+                    <th class="mfg__specs-label" scope="row">
+                      <span aria-hidden="true">🌍</span>
+                      {{ section.settings.label_origin | default: 'Country of Origin' }}
+                    </th>
+                    <td class="mfg__specs-value">{{ mf_origin }}</td>
+                  </tr>
+                {%- endif -%}
+              </tbody>
+            </table>
+          </div>
+        {%- endif -%}
+
+        {%- if has_size_guide -%}
+          <div class="mfg__panel {% unless has_specs %}is-active{% endunless %}"
+            id="MfgPanel-SizeGuide" role="tabpanel"
+            aria-labelledby="MfgTab-SizeGuide" tabindex="0"
+            {% if has_specs %}hidden{% endif %}>
+            <div class="mfg__size-guide" id="MfgSizeGuide"
+              data-json="{{ mf_size_guide | escape }}">
+              <div class="mfg__size-guide-units" role="group" aria-label="Unit toggle">
+                <button class="mfg__unit-btn is-active" type="button" data-unit="cm" aria-pressed="true">cm</button>
+                <button class="mfg__unit-btn" type="button" data-unit="in" aria-pressed="false">in</button>
+              </div>
+              <div class="mfg__size-table-wrap" tabindex="0">
+                <table class="mfg__size-table">
+                  <thead id="MfgSizeHead"></thead>
+                  <tbody id="MfgSizeBody"></tbody>
+                </table>
+              </div>
+              <p class="mfg__size-note" id="MfgSizeNote"></p>
+              <script type="application/json" id="MfgSizeData">{{ mf_size_guide }}</script>
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if has_care -%}
+          <div class="mfg__panel" id="MfgPanel-Care"
+            role="tabpanel" aria-labelledby="MfgTab-Care" tabindex="0" hidden>
+            <div class="mfg__care" id="MfgCare" data-json="{{ mf_care | escape }}">
+              <ul class="mfg__care-list" id="MfgCareList" role="list"></ul>
+              <p class="mfg__care-note" id="MfgCareNote"></p>
+            </div>
+          </div>
+        {%- endif -%}
+
+        {%- if has_faqs -%}
+          <div class="mfg__panel" id="MfgPanel-FAQs"
+            role="tabpanel" aria-labelledby="MfgTab-FAQs" tabindex="0" hidden>
+            <div class="mfg__faqs" id="MfgFAQs" data-json="{{ mf_faqs | escape }}">
+              <div class="mfg__faqs-list" id="MfgFAQsList"></div>
+            </div>
+          </div>
+        {%- endif -%}
+
+      </div>
+    </div>
+
+  {%- elsif section.settings.show_empty_state -%}
+    <div class="mfg__empty">
+      <p>{{ section.settings.empty_text | default: 'No product details added yet.' }}</p>
+    </div>
+  {%- endif -%}
+
+</div>
+
+<script src="{{ 'metafield-manager-generic.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Product Metafields (Generic)",
+  "tag": "section",
+  "enabled_on": { "templates": ["product"] },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Tab Labels"
+    },
+    {
+      "type": "text",
+      "id": "tab_specs_label",
+      "label": "Specifications Tab Label",
+      "default": "Specifications"
+    },
+    {
+      "type": "text",
+      "id": "tab_size_label",
+      "label": "Size Guide Tab Label",
+      "default": "Size Guide"
+    },
+    {
+      "type": "text",
+      "id": "tab_care_label",
+      "label": "Care Instructions Tab Label",
+      "default": "Care Instructions"
+    },
+    {
+      "type": "text",
+      "id": "tab_faqs_label",
+      "label": "FAQs Tab Label",
+      "default": "FAQs"
+    },
+    {
+      "type": "header",
+      "content": "Specs Labels"
+    },
+    {
+      "type": "text",
+      "id": "label_material",
+      "label": "Material Label",
+      "default": "Material"
+    },
+    {
+      "type": "text",
+      "id": "label_weight",
+      "label": "Weight Label",
+      "default": "Weight"
+    },
+    {
+      "type": "text",
+      "id": "label_dimensions",
+      "label": "Dimensions Label",
+      "default": "Dimensions"
+    },
+    {
+      "type": "text",
+      "id": "label_origin",
+      "label": "Origin Label",
+      "default": "Country of Origin"
+    },
+    {
+      "type": "header",
+      "content": "Empty State"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_empty_state",
+      "label": "Show Empty State",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "empty_text",
+      "label": "Empty State Text",
+      "default": "No product details added yet."
+    }
+  ],
+  "presets": [{ "name": "Product Metafields (Generic)" }]
+}
+{% endschema %}
