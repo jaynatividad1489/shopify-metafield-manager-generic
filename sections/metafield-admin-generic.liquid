@@ -1,0 +1,196 @@
+{% comment %}
+  Section: Metafield Admin Tool
+  Version: Generic / Standalone
+  Author: John Venedick Natividad
+  GitHub: https://github.com/jaynatividad1489
+
+  Works on ANY Shopify theme — zero Dawn dependencies.
+  Merchant-facing UI to edit product metafields directly.
+{% endcomment %}
+
+{{ 'metafield-manager-generic.css' | asset_url | stylesheet_tag }}
+
+<div
+  class="mfg-admin"
+  id="MfgAdmin"
+  data-storefront-token="{{ section.settings.storefront_token }}"
+  data-shop="{{ shop.permanent_domain }}"
+>
+  <div class="mfg-admin__inner">
+
+    <div class="mfg-admin__header">
+      <h1 class="mfg-admin__title">🗂️ Metafield Manager</h1>
+      <p class="mfg-admin__subtitle">Edit product metafields without leaving your storefront.</p>
+    </div>
+
+    <div class="mfg-admin__layout">
+
+      {%- comment %} Sidebar {%- endcomment %}
+      <aside class="mfg-admin__sidebar">
+        <input
+          type="search"
+          id="MfgAdminSearch"
+          class="mfg-admin__search"
+          placeholder="Search products..."
+          autocomplete="off"
+          aria-label="Search products"
+        >
+        <div class="mfg-admin__list" id="MfgAdminList" role="listbox" aria-label="Products" aria-busy="true">
+          <div class="mfg-admin__list-loading">
+            <div class="mfg__spinner"><div></div><div></div><div></div><div></div></div>
+            <p>Loading products...</p>
+          </div>
+        </div>
+      </aside>
+
+      {%- comment %} Main Panel {%- endcomment %}
+      <main class="mfg-admin__main" id="MfgAdminMain" aria-live="polite">
+
+        <div class="mfg-admin__empty" id="MfgAdminEmpty">
+          <span class="mfg-admin__empty-icon">👈</span>
+          <p>Select a product from the list to edit its metafields.</p>
+        </div>
+
+        <div class="mfg-admin__form-wrap" id="MfgAdminFormWrap" hidden>
+
+          <div class="mfg-admin__product-bar" id="MfgAdminProductBar">
+            <img class="mfg-admin__product-img" id="MfgAdminImg" src="" alt="" width="60" height="60">
+            <div>
+              <h2 class="mfg-admin__product-name" id="MfgAdminName"></h2>
+              <p class="mfg-admin__product-id" id="MfgAdminId"></p>
+            </div>
+          </div>
+
+          <form class="mfg-admin__form" id="MfgAdminForm" novalidate>
+
+            <fieldset class="mfg-admin__fieldset">
+              <legend class="mfg-admin__legend">📐 Product Specifications</legend>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgMaterial">Material</label>
+                <input type="text" id="MfgMaterial" class="mfg-admin__input"
+                  name="custom.specs_material" data-metafield="custom.specs_material"
+                  placeholder="e.g. 100% Organic Cotton">
+              </div>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgWeight">Weight</label>
+                <input type="text" id="MfgWeight" class="mfg-admin__input"
+                  name="custom.specs_weight" data-metafield="custom.specs_weight"
+                  placeholder="e.g. 250g">
+              </div>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgDimensions">Dimensions</label>
+                <input type="text" id="MfgDimensions" class="mfg-admin__input"
+                  name="custom.specs_dimensions" data-metafield="custom.specs_dimensions"
+                  placeholder="e.g. 30cm x 20cm x 5cm">
+              </div>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgOrigin">Country of Origin</label>
+                <input type="text" id="MfgOrigin" class="mfg-admin__input"
+                  name="custom.specs_origin" data-metafield="custom.specs_origin"
+                  placeholder="e.g. Made in Portugal">
+              </div>
+            </fieldset>
+
+            <fieldset class="mfg-admin__fieldset">
+              <legend class="mfg-admin__legend">📏 Size Guide</legend>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgSizeGuide">
+                  Size Guide (JSON)
+                  <span class="mfg-admin__hint">Format: headers, rows, optional note</span>
+                </label>
+                <textarea id="MfgSizeGuide" class="mfg-admin__textarea"
+                  name="custom.size_guide_json" data-metafield="custom.size_guide_json" rows="5"
+                  placeholder='{"headers":["Size","Chest","Waist"],"rows":[["S","84-88","66-70"]],"note":"In cm."}'></textarea>
+                <button type="button" class="mfg-admin__preview-btn" data-target="MfgSizeGuide" data-preview="size-guide">Preview</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="mfg-admin__fieldset">
+              <legend class="mfg-admin__legend">🧺 Care Instructions</legend>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgCare">
+                  Care Instructions (JSON)
+                  <span class="mfg-admin__hint">Each instruction needs an icon and label</span>
+                </label>
+                <textarea id="MfgCare" class="mfg-admin__textarea"
+                  name="custom.care_instructions_json" data-metafield="custom.care_instructions_json" rows="5"
+                  placeholder='{"instructions":[{"icon":"🌡️","label":"Machine wash 30°C"}],"note":"Check label."}'></textarea>
+                <button type="button" class="mfg-admin__preview-btn" data-target="MfgCare" data-preview="care">Preview</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="mfg-admin__fieldset">
+              <legend class="mfg-admin__legend">❓ Product FAQs</legend>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgFAQs">
+                  FAQs (JSON)
+                  <span class="mfg-admin__hint">Array of question and answer pairs</span>
+                </label>
+                <textarea id="MfgFAQs" class="mfg-admin__textarea"
+                  name="custom.product_faqs_json" data-metafield="custom.product_faqs_json" rows="5"
+                  placeholder='{"faqs":[{"question":"Is it eco-friendly?","answer":"Yes, made from recycled materials."}]}'></textarea>
+                <button type="button" class="mfg-admin__preview-btn" data-target="MfgFAQs" data-preview="faqs">Preview</button>
+              </div>
+            </fieldset>
+
+            <fieldset class="mfg-admin__fieldset">
+              <legend class="mfg-admin__legend">🏷️ Custom Badges</legend>
+              <div class="mfg-admin__field">
+                <label class="mfg-admin__label" for="MfgBadges">
+                  Badges (JSON)
+                  <span class="mfg-admin__hint">Styles: pill or ribbon</span>
+                </label>
+                <textarea id="MfgBadges" class="mfg-admin__textarea"
+                  name="custom.badges_json" data-metafield="custom.badges_json" rows="4"
+                  placeholder='{"badges":[{"label":"New Arrival","style":"pill","color":"#22c55e","text_color":"#fff"}]}'></textarea>
+                <button type="button" class="mfg-admin__preview-btn" data-target="MfgBadges" data-preview="badges">Preview</button>
+              </div>
+            </fieldset>
+
+            <div class="mfg-admin__actions">
+              <button type="submit" class="mfg-admin__save-btn" id="MfgAdminSave">
+                <span class="mfg-admin__save-label">Save Metafields</span>
+                <div class="mfg__spinner mfg__spinner--sm mfg__hidden" aria-hidden="true"><div></div><div></div><div></div><div></div></div>
+              </button>
+              <button type="button" class="mfg-admin__reset-btn" id="MfgAdminReset">Reset Changes</button>
+            </div>
+
+          </form>
+
+          <div class="mfg-admin__status" id="MfgAdminStatus" role="status" aria-live="polite" hidden></div>
+
+          <div class="mfg-admin__preview-panel" id="MfgAdminPreview" hidden>
+            <div class="mfg-admin__preview-header">
+              <h3 class="mfg-admin__preview-title">Preview</h3>
+              <button type="button" class="mfg-admin__preview-close" id="MfgPreviewClose" aria-label="Close preview">✕</button>
+            </div>
+            <div class="mfg-admin__preview-body" id="MfgPreviewBody"></div>
+          </div>
+
+        </div>
+
+      </main>
+
+    </div>
+
+  </div>
+</div>
+
+<script src="{{ 'metafield-manager-generic.js' | asset_url }}" defer="defer"></script>
+
+{% schema %}
+{
+  "name": "Metafield Admin (Generic)",
+  "tag": "section",
+  "enabled_on": { "templates": ["page"] },
+  "settings": [
+    {
+      "type": "text",
+      "id": "storefront_token",
+      "label": "Storefront API Token",
+      "info": "Generate in Shopify Admin → Apps → Develop Apps → API credentials"
+    }
+  ],
+  "presets": [{ "name": "Metafield Admin (Generic)" }]
+}
+{% endschema %}
